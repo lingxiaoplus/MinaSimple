@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">AnimatorSimple</string>
+
+    <string-array name="interpolator">
+        <item>动画加速进行</item>
+        <item>快速完成动画，超出再回到结束样式</item>
+        <item>先加速再减速</item>
+        <item>先退后再加速前进</item>
+        <item>先退后再加速前进，超出终点后再回终点</item>
+        <item>最后阶段弹球效果</item>
+        <item>周期运动</item>
+        <item>减速</item>
+        <item>匀速</item>
+        <item>自定义先减速再加速</item>
+    </string-array>
+</resources>

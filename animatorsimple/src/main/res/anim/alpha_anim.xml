@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<alpha
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="1000"
+    android:fromAlpha="1.0"
+    android:toAlpha="0.0"
+    android:interpolator="@android:anim/accelerate_decelerate_interpolator"
+    >
+    <!--Interpolator 主要作用是可以控制动画的变化速率 ，就是动画进行的快慢节奏-->
+</alpha>
