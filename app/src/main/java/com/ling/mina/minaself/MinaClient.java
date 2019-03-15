@@ -17,13 +17,13 @@ import java.net.InetSocketAddress;
  * Created by 任梦林 on 2018/5/21.
  */
 
-public class Client {
+public class MinaClient {
     private NioSocketConnector connector;
     private IoSession session;
     public ConnectHandler mConnectHandler;
     private static final String IP = "192.168.253.3";
     private static final int PORT = 5678;
-    public Client(){
+    public MinaClient(){
         connector = new NioSocketConnector();
         System.out.println(101);
         // 设置链接超时时间

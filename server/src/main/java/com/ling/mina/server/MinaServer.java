@@ -16,10 +16,10 @@ import java.net.InetSocketAddress;
  * Created by 任梦林 on 2018/5/21.
  */
 
-public class Server {
+public class MinaServer {
     private static int PORT = 5678;
     public ConnectHandler mConnectHandler;
-    public Server(){
+    public MinaServer(){
         NioSocketAcceptor acceptor = null;
         try {
             //创建一个非阻塞的service端的socket

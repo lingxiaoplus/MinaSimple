@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        Server server = new Server();
+                        MinaServer server = new MinaServer();
                     }
                 }).start();
 

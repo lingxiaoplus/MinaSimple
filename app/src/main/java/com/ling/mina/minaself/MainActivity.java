@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        Client client = new Client();
+                        MinaClient client = new MinaClient();
                         boolean ret = client.connect();
                         if (ret){
                             LogUtils.i("连接成功");
