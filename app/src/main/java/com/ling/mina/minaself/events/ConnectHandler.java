@@ -2,10 +2,12 @@ package com.ling.mina.minaself.events;
 
 import com.ling.mina.minaself.LogUtils;
 
+import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 
+import java.nio.ByteOrder;
 import java.util.Date;
 
 /**
@@ -34,8 +36,11 @@ public class ConnectHandler extends IoHandlerAdapter{
     @Override
     public void messageReceived(IoSession session, Object message) throws Exception {
         super.messageReceived(session, message);
-        String msg = message.toString();
-        LogUtils.i("客户端接收消息成功："+msg);
+        /*IoBuffer buffer = (IoBuffer) message;
+        buffer.order(ByteOrder.BIG_ENDIAN);
+        byte arr = buffer.get();
+        String msg = message.toString();*/
+        LogUtils.i("客户端接收消息成功：");
     }
 
     /**
