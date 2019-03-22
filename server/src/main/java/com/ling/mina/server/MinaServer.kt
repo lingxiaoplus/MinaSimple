@@ -38,6 +38,8 @@ class MinaServer {
     }
 
     fun connect(port: Int): Boolean {
+        if (isConnected)
+            return true
         try {
             mConnectHandler = ConnectHandler()
             //注册回调 监听和客户端连接状态
