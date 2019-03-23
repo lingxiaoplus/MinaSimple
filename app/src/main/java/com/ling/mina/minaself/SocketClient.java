@@ -23,13 +23,14 @@ public class SocketClient {
             //键盘输入消息  发送给服务端
             BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
             String readLine = null;
+            messageReplayListener(bufferedReader);
             while (!(readLine = inputReader.readLine()).equals("bye")){
                 System.out.println("我(客户端)：" + readLine);
                 //将键盘输入的消息发送给服务器
                 bufferedWriter.write(readLine+"\n");
                 bufferedWriter.flush();
-                String response = bufferedReader.readLine();
-                System.out.println("服务端: " + response);
+                //String response = bufferedReader.readLine();
+                //System.out.println("服务端: " + response);
             }
             bufferedWriter.close();
             inputReader.close();
@@ -37,6 +38,25 @@ public class SocketClient {
         }catch (IOException e){
             e.printStackTrace();
         }
+    }
 
+    /**
+     * 客户端一直监听服务器的消息
+     * @param reader
+     */
+    void messageReplayListener(final BufferedReader reader){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String response = null;
+                try {
+                    while ((response = reader.readLine()) != null){
+                        System.out.println("服务端: " + response);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 }

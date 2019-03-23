@@ -28,7 +28,9 @@ public class SocketServer {
                         //调用accept()方法开始监听，等待客户端的连接 这个方法会阻塞当前线程
                         Socket socket = serverSocket.accept();
                         System.out.println("客户端连接成功");
+                        //接收客户端消息
                         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                        //给客户端发送消息
                         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                         BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
                         String receivedMsg;

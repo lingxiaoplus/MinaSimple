@@ -1,1 +1,1 @@
-include ':app', ':server', ':animatorsimple'
+include ':app', ':server'

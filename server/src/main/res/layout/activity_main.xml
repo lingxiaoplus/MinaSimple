@@ -28,6 +28,12 @@
         android:hint="请输入消息"
         android:inputType="text|textPersonName"
        />
+    <TextView
+        android:id="@+id/text_ip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        />
     <Button
         android:id="@+id/bt_server"
         android:layout_width="wrap_content"

@@ -1,8 +1,5 @@
 package com.ling.mina.server
 
-import android.graphics.Camera
-
-import com.ling.mina.server.coder.TextCodecFactory
 import com.ling.mina.server.events.ConnectHandler
 import org.apache.mina.core.buffer.IoBuffer
 

@@ -1,5 +1,6 @@
 package com.ling.mina.server
 
+import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -11,6 +12,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
+import java.net.Inet4Address
+import java.net.NetworkInterface
+import java.net.SocketException
 
 
 class MainActivity : AppCompatActivity() {
@@ -48,11 +52,37 @@ class MainActivity : AppCompatActivity() {
             chatList.add(message)
             chatAdapter.notifyDataSetChanged()
         }
+        text_ip.text = "IP地址: " + getIPV4()
         var manager = LinearLayoutManager(this,LinearLayoutManager.VERTICAL,true)
         chatAdapter = ChatAdapter()
         recyclerView.layoutManager = manager
         recyclerView.adapter = chatAdapter
 
+    }
+
+    /**
+     * 获取ipv4地址
+     * @param context
+     * @return
+     */
+    fun getIPV4(): String {
+        try {
+            val en = NetworkInterface.getNetworkInterfaces()
+            while (en.hasMoreElements()) {
+                val intf = en.nextElement()
+                val enumIpAddr = intf.inetAddresses
+                while (enumIpAddr.hasMoreElements()) {
+                    val inetAddress = enumIpAddr.nextElement()
+                    if (!inetAddress.isLoopbackAddress && inetAddress is Inet4Address) {
+                        return inetAddress.getHostAddress()
+                    }
+                }
+            }
+        } catch (ex: SocketException) {
+            ex.printStackTrace()
+        }
+
+        return "null"
     }
 
     inner class ChatAdapter : RecyclerView.Adapter<BaseHolder>() {
