@@ -15,7 +15,7 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {
@@ -42,6 +42,7 @@ dependencies {
     implementation files('libs/slf4j-android-1.6.1-RC1.jar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.android.support:recyclerview-v7:26.1.0'
+    implementation 'com.android.support:support-annotations:26.1.0'
 }
 repositories {
     mavenCentral()

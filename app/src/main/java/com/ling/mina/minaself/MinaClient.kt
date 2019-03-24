@@ -2,6 +2,7 @@ package com.ling.mina.minaself
 
 
 import com.ling.mina.minaself.events.ConnectHandler
+import org.apache.mina.core.buffer.IoBuffer
 import org.apache.mina.core.service.IoHandlerAdapter
 import org.apache.mina.core.session.IdleStatus
 import org.apache.mina.core.session.IoSession
@@ -91,6 +92,12 @@ class MinaClient : IoHandlerAdapter(){
         return false
     }
 
+    fun sendText(message: String){
+        var ioBuffer = IoBuffer.allocate(message.toByteArray().size)
+        ioBuffer.put(message.toByteArray())
+        ioBuffer.flip()
+        session?.write(ioBuffer)
+    }
     /**
      * 向服务端端发送消息后会调用此方法
      * @param session

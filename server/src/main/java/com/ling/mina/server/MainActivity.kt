@@ -1,15 +1,8 @@
 package com.ling.mina.server
 
-import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.view.ViewGroup
-import android.widget.Button
-import android.view.LayoutInflater
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.net.Inet4Address
@@ -20,7 +13,7 @@ import java.net.SocketException
 class MainActivity : AppCompatActivity() {
     private lateinit var mServer: MinaServer
     private lateinit var chatAdapter: ChatAdapter
-    var chatList = arrayListOf<String>()
+    var chatList = arrayListOf<TextData>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -37,6 +30,34 @@ class MainActivity : AppCompatActivity() {
                         bt_server.text = "开启失败"
                     }
                 }
+                mServer.setConnectCallback(object :MinaServer.ConnectCallback{
+                    override fun onSendSuccess() {
+                        bt_server.post({
+                            chatAdapter.notifyDataSetChanged()
+                            recyclerView.smoothScrollToPosition(chatList.size)
+                        })
+                    }
+
+                    override fun onGetMessage(message: Any?) {
+                        val msg = message.toString()
+                        var textData = TextData(TextData.RECEIVER,msg)
+                        chatList.add(textData)
+                        bt_server.post( {
+                            chatAdapter.notifyDataSetChanged()
+                            recyclerView.smoothScrollToPosition(chatList.size)
+                        })
+
+                    }
+
+                    override fun onConnected() {
+
+                    }
+
+                    override fun onError(cause: Throwable) {
+
+                    }
+
+                })
 
             }.start()
         }
@@ -47,14 +68,15 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             mServer.let {
-                it.sendText(message)
+                it.sendText(message + "\n")
             }
-            chatList.add(message)
-            chatAdapter.notifyDataSetChanged()
+            var textData = TextData(TextData.SEND,message)
+            chatList.add(textData)
+
         }
         text_ip.text = "IP地址: " + getIPV4()
-        var manager = LinearLayoutManager(this,LinearLayoutManager.VERTICAL,true)
-        chatAdapter = ChatAdapter()
+        var manager = LinearLayoutManager(this)
+        chatAdapter = ChatAdapter(chatList)
         recyclerView.layoutManager = manager
         recyclerView.adapter = chatAdapter
 
@@ -83,22 +105,5 @@ class MainActivity : AppCompatActivity() {
         }
 
         return "null"
-    }
-
-    inner class ChatAdapter : RecyclerView.Adapter<BaseHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseHolder {
-            val view = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_chat, null)
-            var baseHolder = BaseHolder(view)
-            return baseHolder
-        }
-
-        override fun getItemCount(): Int {
-            return chatList.size
-        }
-
-        override fun onBindViewHolder(holder: BaseHolder, position: Int) {
-            holder.setText(R.id.tv_chat,chatList.get(position))
-        }
     }
 }

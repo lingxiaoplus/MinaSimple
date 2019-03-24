@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="16dp"
+    android:paddingRight="56dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginRight="4dp"
+    >
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginLeft="20dp"
+        android:background="@drawable/cell_chat_bg"
+        android:minHeight="40dp"
+        android:paddingBottom="8dp"
+        android:paddingLeft="28dp"
+        android:paddingRight="8dp"
+        android:paddingTop="8dp">
+
+        <TextView
+            android:id="@+id/txt_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:text="sdsadasdsadasdsadsa"
+            android:minHeight="24dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="#4e5864"
+            />
+    </FrameLayout>
+
+
+    <ImageView
+        android:id="@+id/im_portrait"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="1px"
+        app:srcCompat="@drawable/ic_img_me"
+        android:layout_gravity="start"
+         />
+
+
+</FrameLayout>
