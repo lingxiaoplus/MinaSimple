@@ -28,7 +28,7 @@
         android:id="@+id/bt_client"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="连接"
+        android:text="断开连接"
         />
 
     <Button

@@ -1,5 +1,6 @@
 package com.ling.mina.server
 
+import android.app.ProgressDialog
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -17,60 +18,61 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         bt_server.setOnClickListener { v ->
-            bt_server.isEnabled = false
-            Thread {
-                mServer = MinaServer()
-                var ret = mServer.connect(2333)
-                bt_server.post {
-                    bt_server.isEnabled = true
-                    if(ret){
-                        bt_server.text = "开启成功"
-                    }else{
-                        bt_server.text = "开启失败"
-                    }
-                }
-                mServer.setConnectCallback(object :MinaServer.ConnectCallback{
-                    override fun onSendSuccess() {
-                        bt_server.post({
-                            chatAdapter.notifyDataSetChanged()
-                            recyclerView.smoothScrollToPosition(chatList.size)
-                        })
-                    }
+            showProgress()
+            mServer = MinaServer()
+            mServer
+                    .connect(2333)
+                    .setConnectCallback(object : MinaServer.ConnectCallback {
+                        override fun onSendSuccess() {
+                            bt_server.post({
+                                chatAdapter.notifyDataSetChanged()
+                                recyclerView.smoothScrollToPosition(chatList.size)
+                            })
+                        }
 
-                    override fun onGetMessage(message: Any?) {
-                        val msg = message.toString()
-                        var textData = TextData(TextData.RECEIVER,msg)
-                        chatList.add(textData)
-                        bt_server.post( {
-                            chatAdapter.notifyDataSetChanged()
-                            recyclerView.smoothScrollToPosition(chatList.size)
-                        })
+                        override fun onGetMessage(message: Any?) {
+                            val msg = message.toString()
+                            var textData = TextData(TextData.RECEIVER, msg)
+                            chatList.add(textData)
+                            bt_server.post({
+                                chatAdapter.notifyDataSetChanged()
+                                recyclerView.smoothScrollToPosition(chatList.size)
+                            })
 
-                    }
+                        }
 
-                    override fun onConnected() {
+                        override fun onOpened() {
+                            cancelDialog()
+                            bt_server.text = "开启成功"
+                        }
+                        override fun onConnected() {
 
-                    }
+                        }
 
-                    override fun onError(cause: Throwable) {
+                        override fun onDisConnected() {
 
-                    }
+                        }
 
-                })
+                        override fun onError(cause: Throwable) {
+                            cancelDialog()
+                            Toast.makeText(applicationContext, "服务器异常" + cause.toString(), Toast.LENGTH_SHORT).show()
+                        }
 
-            }.start()
+                    })
         }
-        bt_send.setOnClickListener{
+        bt_send.setOnClickListener {
             var message = editText.text.trim().toString()
-            if (message.isEmpty()){
-                Toast.makeText(applicationContext,"不能发送空消息",Toast.LENGTH_SHORT).show()
+            if (message.isEmpty()) {
+                Toast.makeText(applicationContext, "不能发送空消息", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             mServer.let {
                 it.sendText(message + "\n")
             }
-            var textData = TextData(TextData.SEND,message)
+            editText.setText("")
+            var textData = TextData(TextData.SEND, message)
             chatList.add(textData)
 
         }
@@ -105,5 +107,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         return "null"
+    }
+
+    var progressDialog: ProgressDialog? = null
+    fun showProgress() {
+        progressDialog = ProgressDialog(this)
+        progressDialog?.setMessage("连接中")
+        progressDialog?.show()
+    }
+
+    fun cancelDialog() {
+        progressDialog?.dismiss()
     }
 }

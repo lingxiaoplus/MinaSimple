@@ -1,6 +1,8 @@
 package com.ling.mina.minaself
 
 
+import android.os.Handler
+import android.os.Looper
 import com.ling.mina.minaself.events.ConnectHandler
 import org.apache.mina.core.buffer.IoBuffer
 import org.apache.mina.core.service.IoHandlerAdapter
@@ -11,6 +13,8 @@ import org.apache.mina.filter.codec.textline.TextLineCodecFactory
 import org.apache.mina.transport.socket.nio.NioSocketConnector
 
 import java.net.InetSocketAddress
+import kotlin.concurrent.thread
+import kotlin.properties.Delegates
 
 /**
  * Created by 任梦林 on 2018/5/21.
@@ -20,7 +24,8 @@ class MinaClient : IoHandlerAdapter(){
     private val connector: NioSocketConnector
     private var session: IoSession? = null
     var mConnectHandler: ConnectHandler? = null
-    private var isConnected = false
+    var isConnected = false
+    private var handler:Handler by Delegates.notNull()
     init {
         connector = NioSocketConnector()
         // 设置链接超时时间
@@ -28,68 +33,74 @@ class MinaClient : IoHandlerAdapter(){
         // 添加过滤器
         connector.filterChain.addLast("codec",
                 ProtocolCodecFilter(TextLineCodecFactory()))
+        handler = Handler()
     }
 
-    fun connect(ip: String, port: Int): Boolean {
+    fun connect(ip: String, port: Int): MinaClient {
         if (isConnected)
-            return true
-        connector.handler = this
-        connector.setDefaultRemoteAddress(InetSocketAddress(ip, port))
-        // 监听客户端是否断线
-        /*connector.addListener(object : IoListener() {
-            @Throws(Exception::class)
-            override fun sessionDestroyed(arg0: IoSession) {
-                // TODO Auto-generated method stub
-                super.sessionDestroyed(arg0)
-                try {
-                    val failCount = 0
-                    while (true) {
-                        Thread.sleep(3000)
-                        println((connector.defaultRemoteAddress as InetSocketAddress).address
-                                .hostAddress)
-                        val future = connector.connect()
-                        println("断线2")
-                        future.awaitUninterruptibly()// 等待连接创建完成
-                        println("断线3")
-                        session = future.session// 获得session
-                        println("断线4")
-                        if (session != null && session!!.isConnected) {
-                            println("断线5")
-                            println("断线重连["
-                                    + (session!!.remoteAddress as InetSocketAddress).address.hostAddress
-                                    + ":" + (session!!.remoteAddress as InetSocketAddress).port + "]成功")
-                            session!!.write("start")
-                            break
-                        } else {
-                            println("断线重连失败---->" + failCount + "次")
+            return this
+        thread {
+            connector.handler = this
+            connector.setDefaultRemoteAddress(InetSocketAddress(ip, port))
+            // 监听客户端是否断线
+            /*connector.addListener(object : IoListener() {
+                @Throws(Exception::class)
+                override fun sessionDestroyed(arg0: IoSession) {
+                    // TODO Auto-generated method stub
+                    super.sessionDestroyed(arg0)
+                    try {
+                        val failCount = 0
+                        while (true) {
+                            Thread.sleep(3000)
+                            println((connector.defaultRemoteAddress as InetSocketAddress).address
+                                    .hostAddress)
+                            val future = connector.connect()
+                            println("断线2")
+                            future.awaitUninterruptibly()// 等待连接创建完成
+                            println("断线3")
+                            session = future.session// 获得session
+                            println("断线4")
+                            if (session != null && session!!.isConnected) {
+                                println("断线5")
+                                println("断线重连["
+                                        + (session!!.remoteAddress as InetSocketAddress).address.hostAddress
+                                        + ":" + (session!!.remoteAddress as InetSocketAddress).port + "]成功")
+                                session!!.write("start")
+                                break
+                            } else {
+                                println("断线重连失败---->" + failCount + "次")
+                            }
                         }
+                    } catch (e: Exception) {
+                        // TODO: handle exception
+                        e.printStackTrace()
                     }
-                } catch (e: Exception) {
-                    // TODO: handle exception
-                    e.printStackTrace()
+
                 }
-
+            })*/
+            //开始连接
+            try {
+                val future = connector.connect()
+                future.awaitUninterruptibly()// 等待连接创建完成
+                session = future.session// 获得session
+                isConnected = session != null && session!!.isConnected
+            } catch (e: Exception) {
+                e.printStackTrace()
+                handler.post {
+                    connectCallback?.onError(e)
+                }
+                println("客户端链接异常...")
             }
-        })*/
-        //开始连接
-        try {
-            val future = connector.connect()
-            future.awaitUninterruptibly()// 等待连接创建完成
-            session = future.session// 获得session
-            if (session != null && session!!.isConnected) {
-                println("开始写数据")
-                session!!.write("start")
-            } else {
-                println("写数据失败")
-            }
-            isConnected = session != null && session!!.isConnected
-            return isConnected
-        } catch (e: Exception) {
-            e.printStackTrace()
-            println("客户端链接异常...")
         }
-
-        return false
+        return this
+    }
+    fun disConnect(){
+        if (isConnected){
+            session?.closeOnFlush()
+            connector.dispose()
+        }else{
+            connectCallback?.onDisConnected()
+        }
     }
 
     fun sendText(message: String){
@@ -108,7 +119,9 @@ class MinaClient : IoHandlerAdapter(){
     override fun messageSent(session: IoSession?, message: Any?) {
         super.messageSent(session, message)
         LogUtils.i("客户端发送消息成功")
-        connectCallback?.onSendSuccess()
+        handler.post {
+            connectCallback?.onSendSuccess()
+        }
     }
 
     /**
@@ -125,7 +138,9 @@ class MinaClient : IoHandlerAdapter(){
         byte arr = buffer.get();
         String msg = message.toString();*/
         LogUtils.i("客户端接收消息成功：")
-        connectCallback?.onGetMessage(message)
+        handler.post {
+            connectCallback?.onGetMessage(message)
+        }
     }
 
     /**
@@ -137,7 +152,9 @@ class MinaClient : IoHandlerAdapter(){
     override fun sessionCreated(session: IoSession?) {
         super.sessionCreated(session)
         LogUtils.i("服务器与客户端创建连接")
-        connectCallback?.onConnected()
+        handler.post {
+            connectCallback?.onConnected()
+        }
     }
 
     /**
@@ -160,6 +177,10 @@ class MinaClient : IoHandlerAdapter(){
     override fun sessionClosed(session: IoSession?) {
         super.sessionClosed(session)
         LogUtils.i("关闭与客户端的连接时会调用此方法")
+        isConnected = false
+        handler.post {
+            connectCallback?.onDisConnected()
+        }
     }
 
     /**
@@ -184,7 +205,9 @@ class MinaClient : IoHandlerAdapter(){
     override fun exceptionCaught(session: IoSession?, cause: Throwable) {
         super.exceptionCaught(session, cause)
         LogUtils.i("客户端异常$cause")
-        connectCallback?.onError(cause)
+        handler.post {
+            connectCallback?.onError(cause)
+        }
     }
 
 
@@ -196,6 +219,7 @@ class MinaClient : IoHandlerAdapter(){
         fun onSendSuccess()
         fun onGetMessage(message: Any?)
         fun onConnected()
+        fun onDisConnected()
         fun onError(cause: Throwable)
     }
 }

@@ -1,5 +1,6 @@
 package com.ling.mina.server
 
+import android.os.Handler
 import com.ling.mina.server.events.ConnectHandler
 import org.apache.mina.core.buffer.IoBuffer
 import org.apache.mina.core.service.IoHandlerAdapter
@@ -12,6 +13,8 @@ import org.apache.mina.transport.socket.nio.NioSocketAcceptor
 
 import java.net.InetSocketAddress
 import java.util.*
+import kotlin.concurrent.thread
+import kotlin.properties.Delegates
 
 
 /**
@@ -21,7 +24,7 @@ import java.util.*
 class MinaServer : IoHandlerAdapter(){
     private val acceptor: NioSocketAcceptor
     private var isConnected = false
-
+    private var handler: Handler by Delegates.notNull()
     init {
         //创建一个非阻塞的service端的socket
         acceptor = NioSocketAcceptor()
@@ -33,26 +36,33 @@ class MinaServer : IoHandlerAdapter(){
         acceptor.sessionConfig.readBufferSize = 2048
         //读写通道10秒内无操作进入空闲状态
         acceptor.sessionConfig.setIdleTime(IdleStatus.BOTH_IDLE, 10)
-
+        handler = Handler()
     }
 
-    fun connect(port: Int): Boolean {
+    fun connect(port: Int): MinaServer {
         if (isConnected)
-            return true
-        try {
-            //注册回调 监听和客户端连接状态
-            acceptor.handler = this
-            acceptor.isReuseAddress = true
-            //绑定端口
-            acceptor.bind(InetSocketAddress(port))
-            isConnected = true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            LogUtils.i("服务器连接异常")
-            isConnected = false
-            return false
+            return this
+        thread {
+            try {
+                //注册回调 监听和客户端连接状态
+                acceptor.handler = this
+                acceptor.isReuseAddress = true
+                //绑定端口
+                acceptor.bind(InetSocketAddress(port))
+                isConnected = true
+                handler.post {
+                    connectCallback?.onOpened()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                handler.post {
+                    connectCallback?.onError(e)
+                }
+                LogUtils.i("服务器连接异常")
+                isConnected = false
+            }
         }
-        return true
+        return this
     }
 
     fun sendText(message: String){
@@ -86,7 +96,9 @@ class MinaServer : IoHandlerAdapter(){
     @Throws(Exception::class)
     override fun messageReceived(session: IoSession?, message: Any?) {
         super.messageReceived(session, message)
-        connectCallback?.onGetMessage(message)
+        handler.post {
+            connectCallback?.onGetMessage(message)
+        }
         val msg = message!!.toString()
         /*if ("exit" == msg) {
             // 如果客户端发来exit，则关闭该连接
@@ -107,7 +119,9 @@ class MinaServer : IoHandlerAdapter(){
     @Throws(Exception::class)
     override fun sessionCreated(session: IoSession?) {
         super.sessionCreated(session)
-        connectCallback?.onConnected()
+        handler.post {
+            connectCallback?.onConnected()
+        }
         LogUtils.i("服务器与客户端创建连接")
     }
 
@@ -119,7 +133,6 @@ class MinaServer : IoHandlerAdapter(){
     @Throws(Exception::class)
     override fun sessionOpened(session: IoSession?) {
         super.sessionOpened(session)
-
         LogUtils.i("服务器与客户端连接打开")
     }
 
@@ -131,6 +144,9 @@ class MinaServer : IoHandlerAdapter(){
     @Throws(Exception::class)
     override fun sessionClosed(session: IoSession?) {
         super.sessionClosed(session)
+        handler.post {
+            connectCallback?.onDisConnected()
+        }
         LogUtils.i("关闭与客户端的连接时会调用此方法")
     }
 
@@ -155,7 +171,9 @@ class MinaServer : IoHandlerAdapter(){
     @Throws(Exception::class)
     override fun exceptionCaught(session: IoSession?, cause: Throwable) {
         super.exceptionCaught(session, cause)
-        connectCallback?.onError(cause)
+        handler.post {
+            connectCallback?.onError(cause)
+        }
         LogUtils.i("服务器异常$cause")
     }
 
@@ -166,7 +184,9 @@ class MinaServer : IoHandlerAdapter(){
     interface ConnectCallback{
         fun onSendSuccess()
         fun onGetMessage(message: Any?)
+        fun onOpened()
         fun onConnected()
+        fun onDisConnected()
         fun onError(cause: Throwable)
     }
 

@@ -16,7 +16,7 @@ public class TextDecoder extends CumulativeProtocolDecoder{
 
     @Override
     protected boolean doDecode(IoSession ioSession, IoBuffer in, ProtocolDecoderOutput output) throws Exception {
-        if (in.remaining() >= 8) {//前8字节是包头
+        if (in.remaining() >= 8) {//返回limit-position,缓冲器中的剩余字节  前8字节是包头，如果大于等于8，表示有数据可以处理
             in.mark();
             in.order(ByteOrder.LITTLE_ENDIAN);
             @SuppressWarnings("unused")
