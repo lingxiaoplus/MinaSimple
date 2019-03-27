@@ -10,7 +10,7 @@ import android.widget.TextView
 
 
 /**
- * Created by 任梦林 on 2018/4/20.
+ * Created by @author lingxiao on 2018/4/20.
  */
 
 class BaseHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

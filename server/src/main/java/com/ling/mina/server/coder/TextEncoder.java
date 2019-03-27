@@ -9,7 +9,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 
 /**
- * Created by 任梦林 on 2018/5/21.
+ * Created by @author lingxiao on 2018/5/21.
  */
 
 public class TextEncoder extends ProtocolEncoderAdapter{

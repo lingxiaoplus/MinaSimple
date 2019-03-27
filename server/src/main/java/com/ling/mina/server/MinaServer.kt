@@ -1,7 +1,6 @@
 package com.ling.mina.server
 
 import android.os.Handler
-import com.ling.mina.server.events.ConnectHandler
 import org.apache.mina.core.buffer.IoBuffer
 import org.apache.mina.core.service.IoHandlerAdapter
 
@@ -18,7 +17,7 @@ import kotlin.properties.Delegates
 
 
 /**
- * Created by 任梦林 on 2018/5/21.
+ * Created by @author lingxiao on 2018/5/21.
  */
 
 class MinaServer : IoHandlerAdapter(){
@@ -31,12 +30,12 @@ class MinaServer : IoHandlerAdapter(){
         //设置编解码器  ProtocolCodecFilter拦截器 网络传输需要将对象转换为字节流
         acceptor.filterChain.addLast("codec",
                 ProtocolCodecFilter(TextLineCodecFactory()))
-
         //设置读取数据的缓冲区大小
         acceptor.sessionConfig.readBufferSize = 2048
         //读写通道10秒内无操作进入空闲状态
         acceptor.sessionConfig.setIdleTime(IdleStatus.BOTH_IDLE, 10)
         handler = Handler()
+
     }
 
     fun connect(port: Int): MinaServer {
@@ -44,7 +43,7 @@ class MinaServer : IoHandlerAdapter(){
             return this
         thread {
             try {
-                //注册回调 监听和客户端连接状态
+                //注册回调 监听和客户端之间的消息
                 acceptor.handler = this
                 acceptor.isReuseAddress = true
                 //绑定端口
@@ -100,14 +99,6 @@ class MinaServer : IoHandlerAdapter(){
             connectCallback?.onGetMessage(message)
         }
         val msg = message!!.toString()
-        /*if ("exit" == msg) {
-            // 如果客户端发来exit，则关闭该连接
-            //session.close(true);
-            session!!.closeNow()
-        }
-        // 向客户端发送消息
-        val date = Date()
-        session!!.write(date)*/
         LogUtils.i("服务器接收消息成功：$msg")
     }
 

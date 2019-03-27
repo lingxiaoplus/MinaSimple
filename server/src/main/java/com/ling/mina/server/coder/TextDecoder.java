@@ -9,7 +9,7 @@ import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import java.nio.ByteOrder;
 
 /**
- * Created by 任梦林 on 2018/5/21.
+ * Created by @author lingxiao on 2018/5/21.
  */
 
 public class TextDecoder extends CumulativeProtocolDecoder{

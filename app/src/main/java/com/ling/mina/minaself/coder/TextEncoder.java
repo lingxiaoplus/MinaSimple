@@ -5,7 +5,7 @@ import org.apache.mina.filter.codec.ProtocolEncoderAdapter;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 
 /**
- * Created by 任梦林 on 2018/5/21.
+ * Created by @author lingxiao on 2018/5/21.
  */
 
 public class TextEncoder extends ProtocolEncoderAdapter{

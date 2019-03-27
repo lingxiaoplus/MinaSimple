@@ -2,8 +2,6 @@ package com.ling.mina.minaself
 
 
 import android.os.Handler
-import android.os.Looper
-import com.ling.mina.minaself.events.ConnectHandler
 import org.apache.mina.core.buffer.IoBuffer
 import org.apache.mina.core.service.IoHandlerAdapter
 import org.apache.mina.core.session.IdleStatus
@@ -17,13 +15,13 @@ import kotlin.concurrent.thread
 import kotlin.properties.Delegates
 
 /**
- * Created by 任梦林 on 2018/5/21.
+ * Created by @author lingxiao on 2018/5/21.
  */
 
 class MinaClient : IoHandlerAdapter(){
     private val connector: NioSocketConnector
     private var session: IoSession? = null
-    var mConnectHandler: ConnectHandler? = null
+
     var isConnected = false
     private var handler:Handler by Delegates.notNull()
     init {
